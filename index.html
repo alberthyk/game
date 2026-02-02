@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>터치 게임</title>
+<style>
+  body {
+    margin: 0;
+    background: #0f172a;
+    color: white;
+    font-family: system-ui;
+    text-align: center;
+  }
+  h1 { margin-top: 20px; }
+  #score { font-size: 20px; }
+  #game {
+    position: relative;
+    width: 100vw;
+    height: 80vh;
+    background: #1e293b;
+    overflow: hidden;
+    touch-action: manipulation;
+  }
+  .circle {
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+  }
+  #good { background: #22c55e; }
+  #bad { background: #ef4444; }
+</style>
+</head>
+<body>
+
+<h1>📱 터치해서 살아남기</h1>
+<p id="score">점수: 0</p>
+
+<div id="game">
+  <div id="good" class="circle"></div>
+  <div id="bad" class="circle"></div>
+</div>
+
+<script>
+  const game = document.getElementById("game");
+  const good = document.getElementById("good");
+  const bad = document.getElementById("bad");
+  const scoreText = document.getElementById("score");
+
+  let score = 0;
+
+  function move(el) {
+    const size = 70;
+    el.style.left = Math.random() * (window.innerWidth - size) + "px";
+    el.style.top = Math.random() * (game.clientHeight - size) + "px";
+  }
+
+  good.addEventListener("touchstart", e => {
+    e.preventDefault();
+    score++;
+    scoreText.textContent = "점수: " + score;
+    move(good);
+    move(bad);
+  });
+
+  bad.addEventListener("touchstart", e => {
+    e.preventDefault();
+    alert("💀 게임 오버! 점수: " + score);
+    score = 0;
+    scoreText.textContent = "점수: 0";
+    move(good);
+    move(bad);
+  });
+
+  move(good);
+  move(bad);
+</script>
+
+</body>
+</html>
