@@ -3,78 +3,109 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>터치 게임</title>
+<title>공 떨어뜨리지 마라</title>
 <style>
   body {
     margin: 0;
-    background: #0f172a;
+    background: #020617;
     color: white;
-    font-family: system-ui;
     text-align: center;
-  }
-  h1 { margin-top: 20px; }
-  #score { font-size: 20px; }
-  #game {
-    position: relative;
-    width: 100vw;
-    height: 80vh;
-    background: #1e293b;
+    font-family: system-ui;
     overflow: hidden;
-    touch-action: manipulation;
   }
-  .circle {
-    position: absolute;
-    width: 70px;
-    height: 70px;
+  #score {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+  }
+  #player {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    width: 80px;
+    height: 20px;
+    background: #38bdf8;
+    border-radius: 10px;
+    transform: translateX(-50%);
+  }
+  .ball {
+    position: fixed;
+    top: -40px;
+    width: 30px;
+    height: 30px;
+    background: #facc15;
     border-radius: 50%;
   }
-  #good { background: #22c55e; }
-  #bad { background: #ef4444; }
 </style>
 </head>
 <body>
 
-<h1>📱 터치해서 살아남기</h1>
-<p id="score">점수: 0</p>
-
-<div id="game">
-  <div id="good" class="circle"></div>
-  <div id="bad" class="circle"></div>
-</div>
+<div id="score">시간: 0</div>
+<div id="player"></div>
 
 <script>
-  const game = document.getElementById("game");
-  const good = document.getElementById("good");
-  const bad = document.getElementById("bad");
+  const player = document.getElementById("player");
   const scoreText = document.getElementById("score");
 
-  let score = 0;
+  let x = window.innerWidth / 2;
+  let time = 0;
+  let speed = 3;
+  let alive = true;
 
-  function move(el) {
-    const size = 70;
-    el.style.left = Math.random() * (window.innerWidth - size) + "px";
-    el.style.top = Math.random() * (game.clientHeight - size) + "px";
+  document.addEventListener("touchmove", e => {
+    x = e.touches[0].clientX;
+    player.style.left = x + "px";
+  });
+
+  function spawnBall() {
+    if (!alive) return;
+
+    const ball = document.createElement("div");
+    ball.className = "ball";
+    ball.style.left = Math.random() * (window.innerWidth - 30) + "px";
+    document.body.appendChild(ball);
+
+    let y = -40;
+
+    const fall = setInterval(() => {
+      if (!alive) {
+        clearInterval(fall);
+        ball.remove();
+        return;
+      }
+
+      y += speed;
+      ball.style.top = y + "px";
+
+      const ballRect = ball.getBoundingClientRect();
+      const playerRect = player.getBoundingClientRect();
+
+      if (
+        ballRect.bottom >= playerRect.top &&
+        ballRect.left < playerRect.right &&
+        ballRect.right > playerRect.left
+      ) {
+        clearInterval(fall);
+        ball.remove();
+      }
+
+      if (y > window.innerHeight) {
+        alive = false;
+        alert("💀 게임 오버! 생존 시간: " + time);
+      }
+    }, 16);
   }
 
-  good.addEventListener("touchstart", e => {
-    e.preventDefault();
-    score++;
-    scoreText.textContent = "점수: " + score;
-    move(good);
-    move(bad);
-  });
-
-  bad.addEventListener("touchstart", e => {
-    e.preventDefault();
-    alert("💀 게임 오버! 점수: " + score);
-    score = 0;
-    scoreText.textContent = "점수: 0";
-    move(good);
-    move(bad);
-  });
-
-  move(good);
-  move(bad);
+  setInterval(() => {
+    if (alive) {
+      time++;
+      scoreText.textContent = "시간: " + time;
+      speed += 0.2;
+      spawnBall();
+    }
+  }, 1000);
 </script>
 
 </body>
